@@ -21,15 +21,13 @@ jobs:
         $msbuildPath = Join-Path $vsPath 'MSBuild\Current\Bin'
         echo "MSBUILD_PATH=$msbuildPath" >> $env:GITHUB_ENV
 
-    - name: Cache vcpkg binary and git data
+    - name: Cache vcpkg_installed (x86-windows-static)
       uses: actions/cache@v4
       with:
-        path: |
-          vcpkg/vcpkg.exe
-          vcpkg/.git
-        key: vcpkg-bin-${{ hashFiles('**/vcpkg.json') }}
+        path: vcpkg/vcpkg_installed
+        key: vcpkg-x86-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-          vcpkg-bin-
+          vcpkg-x86-
 
     - name: Setup vcpkg (clone + bootstrap si no está)
       shell: pwsh
