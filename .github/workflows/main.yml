@@ -126,7 +126,7 @@ jobs:
       run: |
         mv '${{ runner.workspace }}/build/otclient' '${{ runner.workspace }}/build/otclient_mac'
     - name: Upload otclient
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Binaries
         path: |
@@ -172,7 +172,7 @@ jobs:
       run: |
         mv '${{ runner.workspace }}/build/otclient' '${{ runner.workspace }}/build/otclient_linux'
     - name: Upload otclient
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Binaries
         path: |
@@ -205,7 +205,7 @@ jobs:
           throw "Invalid exit code: " + $process.ExitCode;
         }
     - name: Upload otclientv8.log
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: otclientv8.log
         name: Download-otclientv8.log
@@ -231,7 +231,7 @@ jobs:
         Get-ChildItem $env:appdata\otclientv8\otclientv8 -Filter *.jpg `
         | Copy-Item -Destination screenshots -Force -PassThru
     - name: Upload screenshot
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: screenshots
         name: Download-screenshots
@@ -240,7 +240,7 @@ jobs:
       run: |
         Remove-Item 'data\things' -Recurse
     - name: Upload otclient
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Download-otclientv8
         path: |
