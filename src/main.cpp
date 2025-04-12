@@ -42,7 +42,7 @@ int main(int argc, const char* argv[]) {
     g_logger.setLogFile(compactName + ".log");
 
     // setup application name and version
-    g_app.setName("TibiaOlderW7_v2");
+    g_app.setName("TibiaOlderW7_v3");
     g_app.setCompactName(compactName);
     g_app.setVersion("3.1");
 
