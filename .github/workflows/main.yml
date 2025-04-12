@@ -25,31 +25,29 @@ jobs:
         Set-Location $env:VCPKG_ROOT
         .\bootstrap-vcpkg.bat
 
-    - name: Run vcpkg
-      uses: lukka/run-vcpkg@main
-      with:
-        vcpkgDirectory: ${{ github.workspace }}/vcpkg/
-        vcpkgTriplet: x86-windows-static
-        vcpkgGitCommitId: 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
-        vcpkgArguments: >
-          boost-iostreams boost-asio boost-beast boost-system boost-variant boost-lockfree boost-process boost-program-options boost-uuid boost-filesystem
-          luajit glew physfs openal-soft libogg libvorbis zlib libzip bzip2 openssl
+    - name: Install dependencies via vcpkg
+      shell: pwsh
+      run: |
+        $env:VCPKG_ROOT = "${{ github.workspace }}\vcpkg"
+        $env:VCPKG_DEFAULT_TRIPLET = "x86-windows-static"
+        Set-Location $env:VCPKG_ROOT
+        .\vcpkg.exe install
 
     - name: Integrate vcpkg
       run: |
         ${{ github.workspace }}/vcpkg/vcpkg integrate install
         
-    - name: Compile otclient_dx
+    - name: Compile otclient_dx Win32
       timeout-minutes: 20
       run: |
         cd vc17
-        MSBuild /property:Configuration=DirectX /p:BUILD_REVISION=${{github.run_number}}
-        
-    - name: Compile otclient_gl
+        MSBuild /property:Configuration=DirectX /p:Platform=Win32 /p:BUILD_REVISION=${{github.run_number}}
+
+    - name: Compile otclient_gl Win32
       timeout-minutes: 20
       run: |
         cd vc17
-        MSBuild /property:Configuration=OpenGL /p:BUILD_REVISION=${{github.run_number}}
+        MSBuild /property:Configuration=OpenGL /p:Platform=Win32 /p:BUILD_REVISION=${{github.run_number}}
 
     #- name: Sign binaries
     #  run: |
@@ -57,10 +55,10 @@ jobs:
     #     .\tools\sign\signtool.exe sign /f .\tools\sign\certificate.pfx /p ${{ secrets.SIGN_PASSWORD }} /fd SHA256 /t http://timestamp.digicert.com /d "OTclientV8" otclient_dx.exe
 
     - name: Upload binaries
-      uses: 'actions/upload-artifact@v4'
+      uses: actions/upload-artifact@v4
       with:
         name: Download-binaries
         path: |
-          otclient_gl.exe
-          otclient_dx.exe
+          vc17\Win32\DirectX\otclient_dx.exe
+          vc17\Win32\OpenGL\otclient_gl.exe
         if-no-files-found: error
