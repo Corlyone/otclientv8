@@ -16,7 +16,7 @@ jobs:
     - name: Setup MSBuild and add to PATH
       uses: microsoft/setup-msbuild@v1.0.2
       id: setup_msbuild
-	  
+
     - name: Setup vcpkg
       shell: pwsh
       run: |
