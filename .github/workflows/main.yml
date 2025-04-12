@@ -8,10 +8,6 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 90
 
-    env:
-      VCPKG_ROOT: ${{ runner.workspace }}\vcpkg
-      VCPKG_DEFAULT_TRIPLET: x86-windows-static
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -25,15 +21,19 @@ jobs:
     - name: Setup vcpkg
       shell: pwsh
       run: |
-        git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
-        Set-Location "$env:VCPKG_ROOT"
+        $env:VCPKG_ROOT = "${{ github.workspace }}\vcpkg"
+        git clone https://github.com/microsoft/vcpkg.git $env:VCPKG_ROOT
+        Set-Location $env:VCPKG_ROOT
         git checkout 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
         .\bootstrap-vcpkg.bat
 
     - name: Install dependencies via vcpkg
       shell: pwsh
       run: |
+        $env:VCPKG_ROOT = "${{ github.workspace }}\vcpkg"
+        $env:VCPKG_DEFAULT_TRIPLET = "x86-windows-static"
         $env:PATH += ";$env:VCPKG_ROOT"
+
         & "$env:VCPKG_ROOT\vcpkg.exe" install `
           boost-iostreams `
           boost-asio `
