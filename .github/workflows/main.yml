@@ -1,12 +1,13 @@
-
 name: Build and test pull request
+
 on: [pull_request]
 
 jobs:
   Windows:
-    name: Build Windows
+    name: Build windows version
     runs-on: windows-2019
     timeout-minutes: 90
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -17,28 +18,56 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
       id: setup_msbuild
 
-    - name: Run vcpkg
-      uses: lukka/run-vcpkg@main
-      with:
-        vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
-        vcpkgTriplet: x86-windows-static
-        vcpkgGitCommitId: 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
-        vcpkgArguments: >
-          boost-iostreams boost-asio boost-beast boost-system boost-variant boost-lockfree boost-process boost-program-options boost-uuid boost-filesystem
-          luajit glew physfs openal-soft libogg libvorbis zlib libzip bzip2 openssl liblzma
+    - name: Setup VCPKG environment
+      shell: pwsh
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}\vcpkg"
+        cd "${{ runner.workspace }}\vcpkg"
+        git checkout 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
+        .\bootstrap-vcpkg.bat
 
+    - name: Install VCPKG Dependencies
+      shell: pwsh
+      run: |
+        $env:VCPKG_ROOT="${{ runner.workspace }}\vcpkg"
+        $env:VCPKG_DEFAULT_TRIPLET="x86-windows-static"
+        $env:PATH += ";$env:VCPKG_ROOT"
+
+        .\vcpkg\vcpkg.exe install `
+          boost-iostreams `
+          boost-asio `
+          boost-beast `
+          boost-system `
+          boost-variant `
+          boost-lockfree `
+          boost-process `
+          boost-program-options `
+          boost-uuid `
+          boost-filesystem `
+          luajit `
+          glew `
+          physfs `
+          openal-soft `
+          libogg `
+          libvorbis `
+          zlib `
+          libzip `
+          bzip2 `
+          openssl `
+          liblzma
 
     - name: Compile
+      shell: pwsh
       timeout-minutes: 60
       run: |
         cd vc17
-        MSBuild /property:Configuration=DirectX /p:BUILD_REVISION=${{github.run_number}}
-        MSBuild /property:Configuration=OpenGL /p:BUILD_REVISION=${{github.run_number}}
+        MSBuild otclient.sln /p:Configuration=DirectX /p:PlatformToolset=v142 /p:BUILD_REVISION=${{github.run_number}}
+        MSBuild otclient.sln /p:Configuration=OpenGL /p:PlatformToolset=v142 /p:BUILD_REVISION=${{github.run_number}}
 
     - name: Upload binaries
       uses: actions/upload-artifact@v4
       with:
-        name: Windows-Binaries
+        name: Binaries
         path: |
           otclient_gl.exe
           otclient_dx.exe
