@@ -8,6 +8,10 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 90
 
+    env:
+      VCPKG_ROOT: ${{ runner.workspace }}\vcpkg
+      VCPKG_DEFAULT_TRIPLET: x86-windows-static
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -18,22 +22,19 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
       id: setup_msbuild
 
-    - name: Setup VCPKG environment
+    - name: Setup vcpkg
       shell: pwsh
       run: |
-        git clone https://github.com/microsoft/vcpkg.git "${{ runner.workspace }}\vcpkg"
-        cd "${{ runner.workspace }}\vcpkg"
+        git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
+        Set-Location "$env:VCPKG_ROOT"
         git checkout 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
         .\bootstrap-vcpkg.bat
 
-    - name: Install VCPKG Dependencies
+    - name: Install dependencies via vcpkg
       shell: pwsh
       run: |
-        $env:VCPKG_ROOT="${{ runner.workspace }}\vcpkg"
-        $env:VCPKG_DEFAULT_TRIPLET="x86-windows-static"
         $env:PATH += ";$env:VCPKG_ROOT"
-
-        .\vcpkg\vcpkg.exe install `
+        & "$env:VCPKG_ROOT\vcpkg.exe" install `
           boost-iostreams `
           boost-asio `
           boost-beast `
@@ -60,9 +61,9 @@ jobs:
       shell: pwsh
       timeout-minutes: 60
       run: |
-        cd vc17
-        MSBuild otclient.sln /p:Configuration=DirectX /p:PlatformToolset=v142 /p:BUILD_REVISION=${{github.run_number}}
-        MSBuild otclient.sln /p:Configuration=OpenGL /p:PlatformToolset=v142 /p:BUILD_REVISION=${{github.run_number}}
+        Set-Location vc17
+        MSBuild otclient.sln /m /p:Configuration=DirectX /p:PlatformToolset=v142 /p:BUILD_REVISION=${{ github.run_number }}
+        MSBuild otclient.sln /m /p:Configuration=OpenGL /p:PlatformToolset=v142 /p:BUILD_REVISION=${{ github.run_number }}
 
     - name: Upload binaries
       uses: actions/upload-artifact@v4
