@@ -37,7 +37,7 @@ jobs:
         MSBuild /property:Configuration=DirectX /p:BUILD_REVISION=${{github.run_number}}
         MSBuild /property:Configuration=OpenGL /p:BUILD_REVISION=${{github.run_number}}
     - name: Upload binaries
-      uses: 'actions/upload-artifact@v2'
+      uses: 'actions/upload-artifact@v3'
       with:
         name: Binaries
         path: |
@@ -80,7 +80,7 @@ jobs:
         $env:VS_NdkRoot="C:\Android\android-sdk\ndk\21.4.7075529"
         MSBuild.exe /p:Configuration=Release /p:Platform="ARM64" /p:BUILD_REVISION=${{github.run_number}}
     - name: Upload binaries
-      uses: 'actions/upload-artifact@v2'
+      uses: 'actions/upload-artifact@v3'
       with:
         name: Binaries
         path: |
