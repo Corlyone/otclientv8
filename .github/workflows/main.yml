@@ -31,7 +31,7 @@ jobs:
     - name: Compile
       timeout-minutes: 60
       run: |
-        cd vc16
+        cd vc17
         MSBuild /property:Configuration=DirectX /p:BUILD_REVISION=${{github.run_number}}
         MSBuild /property:Configuration=OpenGL /p:BUILD_REVISION=${{github.run_number}}
 
