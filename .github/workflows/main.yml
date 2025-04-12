@@ -28,42 +28,28 @@ jobs:
         .\bootstrap-vcpkg.bat
 
     - name: Install dependencies via vcpkg
-      shell: pwsh
       run: |
         $env:VCPKG_ROOT = "${{ github.workspace }}\vcpkg"
         $env:VCPKG_DEFAULT_TRIPLET = "x86-windows-static"
         $env:PATH += ";$env:VCPKG_ROOT"
+        Set-Location ${{ github.workspace }}  # Asegúrate de estar en la carpeta principal del proyecto
+        & "$env:VCPKG_ROOT\vcpkg.exe" install --triplet x86-windows-static
 
-        & "$env:VCPKG_ROOT\vcpkg.exe" install `
-          boost-iostreams `
-          boost-asio `
-          boost-beast `
-          boost-system `
-          boost-variant `
-          boost-lockfree `
-          boost-process `
-          boost-program-options `
-          boost-uuid `
-          boost-filesystem `
-          luajit `
-          glew `
-          physfs `
-          openal-soft `
-          libogg `
-          libvorbis `
-          zlib `
-          libzip `
-          bzip2 `
-          openssl `
-          liblzma
-
-    - name: Compile
-      shell: pwsh
-      timeout-minutes: 60
+    - name: Integrate vcpkg
       run: |
-        Set-Location vc17
-        MSBuild otclient.sln /m /p:Configuration=DirectX /p:PlatformToolset=v142 /p:BUILD_REVISION=${{ github.run_number }}
-        MSBuild otclient.sln /m /p:Configuration=OpenGL /p:PlatformToolset=v142 /p:BUILD_REVISION=${{ github.run_number }}
+        ${{ github.workspace }}/vcpkg/vcpkg integrate install
+
+    - name: Compile otclient_dx
+      timeout-minutes: 20
+      run: |
+        cd vc17
+        MSBuild /property:Configuration=DirectX /p:BUILD_REVISION=${{github.run_number}}
+
+    - name: Compile otclient_gl
+      timeout-minutes: 20
+      run: |
+        cd vc17
+        MSBuild /property:Configuration=OpenGL /p:BUILD_REVISION=${{github.run_number}}
 
     - name: Upload binaries
       uses: actions/upload-artifact@v4
